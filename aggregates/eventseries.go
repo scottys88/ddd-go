@@ -108,7 +108,8 @@ func (es *EventSeries) UpdateOrganiserID(organiserID uuid.UUID) error {
 
 func (es *EventSeries) RemoveEvent(eventID uuid.UUID) error {
 	for i, event := range es.events {
-		if event.ID == eventID {
+		id := event.ID
+		if id == eventID {
 			es.events = append(es.events[:i], es.events[i+1:]...)
 			es.updatedAt = time.Now()
 			return nil
