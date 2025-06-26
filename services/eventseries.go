@@ -7,14 +7,14 @@ import (
 	"github.com/scottys88/ddd-go/domain/eventseries/memory"
 )
 
-type EventSeriesConfiguration func(es *EventService) error
+type EventSeriesConfiguration func(es *EventSeriesService) error
 
-type EventService struct {
+type EventSeriesService struct {
 	eventSeries eventseries.EventSeriesRepository
 }
 
-func NewEventService(options ...EventSeriesConfiguration) (*EventService, error) {
-	es := &EventService{}
+func NewEventSeriesService(options ...EventSeriesConfiguration) (*EventSeriesService, error) {
+	es := &EventSeriesService{}
 
 	for _, option := range options {
 		err := option(es)
@@ -27,7 +27,7 @@ func NewEventService(options ...EventSeriesConfiguration) (*EventService, error)
 }
 
 func WithEventSeriesRepository(repo eventseries.EventSeriesRepository) EventSeriesConfiguration {
-	return func(es *EventService) error {
+	return func(es *EventSeriesService) error {
 		if repo == nil {
 			return eventseries.ErrFailedToAddEventSeries
 		}
@@ -41,8 +41,20 @@ func WithMemoryEventSeriesRepository() EventSeriesConfiguration {
 	return WithEventSeriesRepository(repo)
 }
 
-func (es *EventService) Create(organiseID uuid.UUID) (aggregates.EventSeries, error) {
-	// fetch the organiser from the customer repo to be built
-	// ensure they exist
-	return aggregates.EventSeries{}, nil
+func (es *EventSeriesService) Create(name, description string, organiserID uuid.UUID) (*aggregates.EventSeries, error) {
+	// TODO: fetch the organiser from the customer repo to be built
+	// TODO: ensure they exist
+
+	// Create new event series aggregate
+	eventSeries, err := aggregates.NewEventSeries(name, description, organiserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Save to repository
+	if err := es.eventSeries.Add(*eventSeries); err != nil {
+		return nil, err
+	}
+
+	return eventSeries, nil
 }

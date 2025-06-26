@@ -11,27 +11,25 @@ type Person struct {
 	name       string
 	email      string
 	phone      string
-	entryIDs   []uuid.UUID
 	createdAt  time.Time
 	updatedAt  time.Time
 	archivedAt *time.Time
 }
 
-func NewPerson(name, email, phone string) (Person, error) {
+func NewPerson(name, email, phone string) (*Person, error) {
 	if name == "" {
-		return Person{}, errors.New("name is required")
+		return nil, errors.New("name is required")
 	}
 
 	if email == "" {
-		return Person{}, errors.New("email is required")
+		return nil, errors.New("email is required")
 	}
 
-	return Person{
+	return &Person{
 		id:        uuid.New(),
 		name:      name,
 		email:     email,
 		phone:     phone,
-		entryIDs:  []uuid.UUID{},
 		createdAt: time.Now(),
 		updatedAt: time.Now(),
 	}, nil
@@ -53,8 +51,16 @@ func (p *Person) Phone() string {
 	return p.phone
 }
 
-func (p *Person) EntryIDs() []uuid.UUID {
-	return p.entryIDs
+func (p *Person) CreatedAt() time.Time {
+	return p.createdAt
+}
+
+func (p *Person) UpdatedAt() time.Time {
+	return p.updatedAt
+}
+
+func (p *Person) ArchivedAt() *time.Time {
+	return p.archivedAt
 }
 
 func (p *Person) UpdateName(name string) error {
@@ -80,27 +86,8 @@ func (p *Person) UpdatePhone(phone string) {
 	p.updatedAt = time.Now()
 }
 
-func (p *Person) AddEntryID(entryID uuid.UUID) error {
-	if entryID == uuid.Nil {
-		return errors.New("entry ID cannot be nil")
-	}
-	p.entryIDs = append(p.entryIDs, entryID)
-	p.updatedAt = time.Now()
-	return nil
-}
-
-func (p *Person) RemoveEntryID(entryID uuid.UUID) error {
-	for i, id := range p.entryIDs {
-		if id == entryID {
-			p.entryIDs = append(p.entryIDs[:i], p.entryIDs[i+1:]...)
-			p.updatedAt = time.Now()
-			return nil
-		}
-	}
-	return errors.New("entry ID not found")
-}
-
-func (p *Person) SetEntryIDs(entryIDs []uuid.UUID) {
-	p.entryIDs = entryIDs
-	p.updatedAt = time.Now()
+func (p *Person) Archive() {
+	now := time.Now()
+	p.archivedAt = &now
+	p.updatedAt = now
 }
